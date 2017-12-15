@@ -17,34 +17,38 @@ class Board extends React.Component {
 
     generateBoard(numberOfRows, numberOfColumns, numberOfBombs) {
         let board = [];
+        let numberOfBombsPlaced = 0;
         
-            for (let i = 0; i < numberOfRows; i++) {
-                let row = [];
-                for (let j = 0; j < numberOfColumns; j++) {
-                    row.push(<Tile row={i} column={j} isBomb={false} onTileClick={this.flipTile} />);
-                }
-                board.push(row);
+        // Optimize this
+        for (let i = 0; i < numberOfRows; i++) {
+            let row = [];
+            for (let j = 0; j < numberOfColumns; j++) {
+                row.push(<Tile  key={i.toString() + j.toString()} 
+                                row={i} column={j} 
+                                isBomb={false} 
+                                onTileClick={this.flipTile} 
+                                board={this} />);   // Passing the Board context to the tile explicitly
             }
-    
-            let numberOfBombsPlaced = 0;
-    
-            while (numberOfBombsPlaced < numberOfBombs) {
-                let randomRowIndex = Math.floor(Math.random() * numberOfRows);
-                let randomColumnIndex = Math.floor(Math.random() * numberOfColumns);
-    
-                if (!board[randomRowIndex][randomColumnIndex].props.isBomb) {
-                    board[randomRowIndex][randomColumnIndex] = <Tile row={randomRowIndex} column={randomColumnIndex} isBomb={true} onTileClick={this.flipTile} />;
-                    numberOfBombsPlaced++;
-                }
-            }
+            board.push(row);
+        }
 
-            return board;
+        while (numberOfBombsPlaced < numberOfBombs) {
+            let randomRowIndex = Math.floor(Math.random() * numberOfRows);
+            let randomColumnIndex = Math.floor(Math.random() * numberOfColumns);
+
+            if (!board[randomRowIndex][randomColumnIndex].props.isBomb) {
+                board[randomRowIndex][randomColumnIndex] = React.cloneElement(board[randomRowIndex][randomColumnIndex], {isBomb: true});
+                numberOfBombsPlaced++;
+            }
+        }
+
+        return board;
     }
 
     // Handle a tile click
     flipTile(eventTile) {
-        console.log(eventTile);
-        console.log(this);
+        let numNeighborBombs = 0;
+
         if (eventTile.props.isBomb) {
             console.log('you lose');
             // Build what happens when you lose
@@ -53,8 +57,11 @@ class Board extends React.Component {
             console.log('no bombs nearby');
         } else {
             // Show how many bombs are adjacent to this tile
-            eventTile.props.neighborBombs = this.getNumberOfNeighborBombs(eventTile);
-            console.log(eventTile.props.neighborBombs);
+            numNeighborBombs = this.getNumberOfNeighborBombs(eventTile);
+            let markedTile = React.cloneElement(this.state.board[eventTile.props.row][eventTile.props.column], {neighborBombs: numNeighborBombs});
+            // Find a way to reset the state....
+            
+            console.log(numNeighborBombs);
         }
 
         // Update the number of tiles remaining, so you know when the game is over
@@ -66,24 +73,23 @@ class Board extends React.Component {
     }
 
     getNumberOfNeighborBombs(tile) {
-        console.log('finally');
-        // const neighborOffsets = [[-1,-1],[-1,0],[-1,1],[0,1],[1,1],[1,0],[1,-1],[0,-1]];
-        // const numberOfRows = this.state.board.length;
-        // const numberOfColumns = this.state.board[0].length;
-        // let numberOfBombs = 0;
+        const neighborOffsets = [[-1,-1],[-1,0],[-1,1],[0,1],[1,1],[1,0],[1,-1],[0,-1]];
+        const numberOfRows = this.state.board.length;
+        const numberOfColumns = this.state.board[0].length;
+        let numberOfBombs = 0;
     
-        // neighborOffsets.forEach(offset => {
-        //     const neighborRowIndex = rowIndex + offset[0];
-        //     const neighborColumnIndex = columnIndex + offset[1];
+        neighborOffsets.forEach(offset => {
+            const neighborRowIndex = tile.props.row + offset[0];
+            const neighborColumnIndex = tile.props.column + offset[1];
     
-        //     if (neighborRowIndex >= 0 && neighborRowIndex < numberOfRows && neighborColumnIndex >= 0 && neighborColumnIndex < numberOfColumns) {
-        //         if (this.state.board[neighborRowIndex][neighborColumnIndex].props.isBomb) {
-        //             numberOfBombs++;
-        //         }
-        //     }
-        // });
+            if (neighborRowIndex >= 0 && neighborRowIndex < numberOfRows && neighborColumnIndex >= 0 && neighborColumnIndex < numberOfColumns) {
+                if (this.state.board[neighborRowIndex][neighborColumnIndex].props.isBomb) {
+                    numberOfBombs++;
+                }
+            }
+        });
     
-        // return numberOfBombs;
+        return numberOfBombs;
     }
 
     render() {

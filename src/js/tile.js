@@ -8,18 +8,14 @@ class Tile extends React.Component {
         this.state = {
             value : this.props.isBomb ? 'B' : ''
         }
-
-        this.handleClick = this.handleClick.bind(this);
-    }
-
-    handleClick() {
-        this.props.onTileClick(this);
     }
 
     render() {
         return (
             <span className="tile">
-                <button onClick={this.handleClick}>
+                <button onClick={() => {
+                    this.props.onTileClick.call(this.props.board, this);
+                }}>
                     {this.state.value}
                 </button>
             </span>
