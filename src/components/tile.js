@@ -2,21 +2,13 @@ import React from 'react';
 import '../css/tile.css';
 
 class Tile extends React.Component {
-    constructor(props) {
-        super(props);
-
-        this.state = {
-            value : this.props.isBomb ? 'B' : ''
-        }
-    }
-
     render() {
         return (
             <span className="tile">
-                <button onClick={() => {
+                <button disabled={this.props.wasClicked} onClick={() => {
                     this.props.onTileClick.call(this.props.board, this);
                 }}>
-                    {this.state.value}
+                    {this.props.value}
                 </button>
             </span>
         );
