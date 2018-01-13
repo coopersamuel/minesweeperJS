@@ -1,14 +1,16 @@
 import React from 'react';
 import Tile from './tile';
+import { connect } from 'react-redux';
+import { editBoard, editTile, setRemainingTiles } from '../actions/boardActions';
+import { bindActionCreators } from 'redux';
 
 class Board extends React.Component {
     constructor(props) {
         super(props);
 
-        this.state = {
-            board : this.generateBoard(this.props.numberOfRows, this.props.numberOfColumns, this.props.numberOfBombs),
-            remainingTiles : this.props.numberOfRows * this.props.numberOfColumns
-        };
+        // Need to initialize the board in redux state
+        this.generateBoard(this.props.numberOfRows, this.props.numberOfColumns, this.props.numberOfBombs);
+        this.props.setRemainingTiles(this.props.numberOfRows * this.props.numberOfColumns);
 
         this.generateBoard = this.generateBoard.bind(this);
         this.flipTile = this.flipTile.bind(this);
@@ -45,94 +47,78 @@ class Board extends React.Component {
             }
         }
 
-        return board;
+        // call action to initialize the board
+        this.props.editBoard(board);
     }
 
     // Handle a tile click
     flipTile(eventTile) {
-        // Create a shallow copy of the board so that you can change the state of the tiles
-        let clonedBoard = this.state.board.map(row => {
-            return row.map(tile => {
-                return React.cloneElement(tile);
-            });
-        });
-    
         let numNeighborBombs = 0;
         let markedTile;
         if (eventTile.props.isBomb) {
             console.log('you lose');
             // Build what happens when you lose
-            markedTile = React.cloneElement(this.state.board[eventTile.props.row][eventTile.props.column], {wasClicked: true, value: 'B'});            
+            markedTile = React.cloneElement(this.props.board[eventTile.props.row][eventTile.props.column], {wasClicked: true, value: 'B'});            
         } else if (this.getNumberOfNeighborBombs(eventTile) === 0) {
-            markedTile = React.cloneElement(this.state.board[eventTile.props.row][eventTile.props.column], {wasClicked: true, value: 0});
-            clonedBoard[eventTile.props.row][eventTile.props.column] = markedTile;
-            this.setState({
-                board : clonedBoard
-            });
-            // Need to get this working, figure out componentDidUpdate....
-            debugger;
+            markedTile = React.cloneElement(this.props.board[eventTile.props.row][eventTile.props.column], {wasClicked: true, value: 0});
             this.autoFlipTile(markedTile);
         } else {
             // Show how many bombs are adjacent to this tile
             numNeighborBombs = this.getNumberOfNeighborBombs(eventTile);
-            markedTile = React.cloneElement(this.state.board[eventTile.props.row][eventTile.props.column], {wasClicked: true, value: numNeighborBombs});
+            markedTile = React.cloneElement(this.props.board[eventTile.props.row][eventTile.props.column], {wasClicked: true, value: numNeighborBombs});
         }
 
-        // Replace the clicked eventTile with the new markedTile and reset the state
-        clonedBoard[eventTile.props.row][eventTile.props.column] = markedTile;
-        this.setState({
-            board : clonedBoard
-        });
+        // Calling editTile to replace the clicked eventTile with the new markedTile
+        this.props.editTile(markedTile);
+        this.forceUpdate(); // Forcing update because redux' shallow comparison neglects this tiny state change and doesn't re-render automatically
+                            // https://github.com/reactjs/redux/issues/585
 
         // Update the number of tiles remaining, so you know when the game is over
-        let numberOfTiles = this.state.remainingTiles;
-        numberOfTiles--;
-        this.setState({
-            remainingTiles : numberOfTiles
-        });
+        let numTiles = this.props.remainingTiles;
+        this.props.setRemainingTiles(numTiles--);
     }
 
     autoFlipTile (tile) {
-        const neighborOffsets = [[-1,-1],[-1,0],[-1,1],[0,1],[1,1],[1,0],[1,-1],[0,-1]];
-        const numberOfRows = this.state.board.length;
-        const numberOfColumns = this.state.board[0].length;
+        // const neighborOffsets = [[-1,-1],[-1,0],[-1,1],[0,1],[1,1],[1,0],[1,-1],[0,-1]];
+        // const numberOfRows = this.state.board.length;
+        // const numberOfColumns = this.state.board[0].length;
 
-        neighborOffsets.forEach(offset => {
-            const neighborRowIndex = tile.props.row + offset[0];
-            const neighborColumnIndex = tile.props.column + offset[1];
-            debugger;
+        // neighborOffsets.forEach(offset => {
+        //     const neighborRowIndex = tile.props.row + offset[0];
+        //     const neighborColumnIndex = tile.props.column + offset[1];
+        //     debugger;
             
-            if (neighborRowIndex >= 0 && neighborRowIndex < numberOfRows && neighborColumnIndex >= 0 && neighborColumnIndex < numberOfColumns && !this.state.board[neighborRowIndex][neighborColumnIndex].props.wasClicked) {
-                let neighborTile = this.state.board[neighborRowIndex][neighborColumnIndex];                 
-                this.flipTile(neighborTile);
-            }
-        });
+        //     if (neighborRowIndex >= 0 && neighborRowIndex < numberOfRows && neighborColumnIndex >= 0 && neighborColumnIndex < numberOfColumns && !this.state.board[neighborRowIndex][neighborColumnIndex].props.wasClicked) {
+        //         let neighborTile = this.state.board[neighborRowIndex][neighborColumnIndex];                 
+        //         this.flipTile(neighborTile);
+        //     }
+        // });
     }
 
     getNumberOfNeighborBombs(tile) {
-        const neighborOffsets = [[-1,-1],[-1,0],[-1,1],[0,1],[1,1],[1,0],[1,-1],[0,-1]];
-        const numberOfRows = this.state.board.length;
-        const numberOfColumns = this.state.board[0].length;
-        let numberOfBombs = 0;
+        // const neighborOffsets = [[-1,-1],[-1,0],[-1,1],[0,1],[1,1],[1,0],[1,-1],[0,-1]];
+        // const numberOfRows = this.state.board.length;
+        // const numberOfColumns = this.state.board[0].length;
+        // let numberOfBombs = 0;
     
-        neighborOffsets.forEach(offset => {
-            const neighborRowIndex = tile.props.row + offset[0];
-            const neighborColumnIndex = tile.props.column + offset[1];
+        // neighborOffsets.forEach(offset => {
+        //     const neighborRowIndex = tile.props.row + offset[0];
+        //     const neighborColumnIndex = tile.props.column + offset[1];
     
-            if (neighborRowIndex >= 0 && neighborRowIndex < numberOfRows && neighborColumnIndex >= 0 && neighborColumnIndex < numberOfColumns) {
-                if (this.state.board[neighborRowIndex][neighborColumnIndex].props.isBomb) {
-                    numberOfBombs++;
-                }
-            }
-        });
+        //     if (neighborRowIndex >= 0 && neighborRowIndex < numberOfRows && neighborColumnIndex >= 0 && neighborColumnIndex < numberOfColumns) {
+        //         if (this.state.board[neighborRowIndex][neighborColumnIndex].props.isBomb) {
+        //             numberOfBombs++;
+        //         }
+        //     }
+        // });
     
-        return numberOfBombs;
+        // return numberOfBombs;
     }
 
     render() {
         return (
             <div>
-                {this.state.board.map(row => {
+                {this.props.board.map(row => {
                     return (
                         <div>
                             {row}
@@ -144,4 +130,24 @@ class Board extends React.Component {
     }
 }
 
-export default Board;
+function mapStateToProps (state) {
+    // Whatever is returned here shows up as props for the Board container
+    return {
+        board : state.board,
+        remainingTiles : state.remainingTiles
+    };
+}
+
+// Whatever is returned from this function (in the first argument of bindActionCreators) will show up as props on the Board container
+function mapDispatchToProps(dispatch) {
+    // whenever the action is called, bindActionCreators will pass the result to all of our reducers
+    return bindActionCreators({
+        editBoard: editBoard,
+        editTile: editTile,
+        setRemainingTiles: setRemainingTiles
+    }, dispatch);
+}
+
+// connect takes a function and a component and produces a container
+// a container is simply a component that is aware of Redux
+export default connect(mapStateToProps, mapDispatchToProps)(Board);
