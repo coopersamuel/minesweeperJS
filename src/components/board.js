@@ -55,21 +55,23 @@ class Board extends React.Component {
     flipTile(eventTile) {
         let numNeighborBombs = 0;
         let markedTile;
+
         if (eventTile.props.isBomb) {
             console.log('you lose');
             // Build what happens when you lose
             markedTile = React.cloneElement(this.props.board[eventTile.props.row][eventTile.props.column], {wasClicked: true, value: 'B'});            
+            this.props.editTile(markedTile);
         } else if (this.getNumberOfNeighborBombs(eventTile) === 0) {
             markedTile = React.cloneElement(this.props.board[eventTile.props.row][eventTile.props.column], {wasClicked: true, value: 0});
+            this.props.editTile(markedTile);
             this.autoFlipTile(markedTile);
         } else {
             // Show how many bombs are adjacent to this tile
             numNeighborBombs = this.getNumberOfNeighborBombs(eventTile);
             markedTile = React.cloneElement(this.props.board[eventTile.props.row][eventTile.props.column], {wasClicked: true, value: numNeighborBombs});
+            this.props.editTile(markedTile);
         }
 
-        // Calling editTile to replace the clicked eventTile with the new markedTile
-        this.props.editTile(markedTile);
         this.forceUpdate(); // Forcing update because redux' shallow comparison neglects this tiny state change and doesn't re-render automatically
                             // https://github.com/reactjs/redux/issues/585
 
@@ -79,40 +81,41 @@ class Board extends React.Component {
     }
 
     autoFlipTile (tile) {
-        // const neighborOffsets = [[-1,-1],[-1,0],[-1,1],[0,1],[1,1],[1,0],[1,-1],[0,-1]];
-        // const numberOfRows = this.state.board.length;
-        // const numberOfColumns = this.state.board[0].length;
+        const neighborOffsets = [[-1,-1],[-1,0],[-1,1],[0,1],[1,1],[1,0],[1,-1],[0,-1]];
+        const numberOfRows = this.props.board.length;
+        const numberOfColumns = this.props.board[0].length;
+        
+        console.log('here');
 
-        // neighborOffsets.forEach(offset => {
-        //     const neighborRowIndex = tile.props.row + offset[0];
-        //     const neighborColumnIndex = tile.props.column + offset[1];
-        //     debugger;
+        neighborOffsets.forEach(offset => {
+            const neighborRowIndex = tile.props.row + offset[0];
+            const neighborColumnIndex = tile.props.column + offset[1];
             
-        //     if (neighborRowIndex >= 0 && neighborRowIndex < numberOfRows && neighborColumnIndex >= 0 && neighborColumnIndex < numberOfColumns && !this.state.board[neighborRowIndex][neighborColumnIndex].props.wasClicked) {
-        //         let neighborTile = this.state.board[neighborRowIndex][neighborColumnIndex];                 
-        //         this.flipTile(neighborTile);
-        //     }
-        // });
+            if (neighborRowIndex >= 0 && neighborRowIndex < numberOfRows && neighborColumnIndex >= 0 && neighborColumnIndex < numberOfColumns && !this.props.board[neighborRowIndex][neighborColumnIndex].props.wasClicked) {
+                let neighborTile = this.props.board[neighborRowIndex][neighborColumnIndex];                 
+                this.flipTile(neighborTile);
+            }
+        });
     }
 
     getNumberOfNeighborBombs(tile) {
-        // const neighborOffsets = [[-1,-1],[-1,0],[-1,1],[0,1],[1,1],[1,0],[1,-1],[0,-1]];
-        // const numberOfRows = this.state.board.length;
-        // const numberOfColumns = this.state.board[0].length;
-        // let numberOfBombs = 0;
+        const neighborOffsets = [[-1,-1],[-1,0],[-1,1],[0,1],[1,1],[1,0],[1,-1],[0,-1]];
+        const numberOfRows = this.props.board.length;
+        const numberOfColumns = this.props.board[0].length;
+        let numberOfBombs = 0;
     
-        // neighborOffsets.forEach(offset => {
-        //     const neighborRowIndex = tile.props.row + offset[0];
-        //     const neighborColumnIndex = tile.props.column + offset[1];
+        neighborOffsets.forEach(offset => {
+            const neighborRowIndex = tile.props.row + offset[0];
+            const neighborColumnIndex = tile.props.column + offset[1];
     
-        //     if (neighborRowIndex >= 0 && neighborRowIndex < numberOfRows && neighborColumnIndex >= 0 && neighborColumnIndex < numberOfColumns) {
-        //         if (this.state.board[neighborRowIndex][neighborColumnIndex].props.isBomb) {
-        //             numberOfBombs++;
-        //         }
-        //     }
-        // });
+            if (neighborRowIndex >= 0 && neighborRowIndex < numberOfRows && neighborColumnIndex >= 0 && neighborColumnIndex < numberOfColumns) {
+                if (this.props.board[neighborRowIndex][neighborColumnIndex].props.isBomb) {
+                    numberOfBombs++;
+                }
+            }
+        });
     
-        // return numberOfBombs;
+        return numberOfBombs;
     }
 
     render() {

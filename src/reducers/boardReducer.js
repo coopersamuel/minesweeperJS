@@ -12,9 +12,7 @@ export default function boardReducer(state = initialState.board, action) {
         case Types.EDIT_BOARD:
             return action.payload;
         case Types.EDIT_TILE:
-            console.log(action.payload.props.row);
             newState[action.payload.props.row][action.payload.props.column] = action.payload;
-            console.log(newState);
             return newState;
     }
 
