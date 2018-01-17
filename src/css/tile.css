@@ -1,8 +1,14 @@
 .tile button {
     cursor: pointer;
-    width: 25px;
-    height: 25px;
+    width: 35px;
+    height: 35px;
     padding: 2px;
     border-radius: 4px;
     background-color: #bcbcbc;
+    outline: none;
+    vertical-align: top;
+}
+
+button:hover {
+    background-color: aquamarine;
 }

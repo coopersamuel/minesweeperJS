@@ -1,5 +1,6 @@
 body {
     background: #f9fafb;
+    text-align: center;
     font-family: Arial;
     font-size: 16px;
     margin: 0;
@@ -9,4 +10,9 @@ body {
 .title {
     font-family: Arial;
     color: #6c41ec;
+}
+
+.content {
+    display: inline-block;
+    float: none;
 }
