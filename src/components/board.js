@@ -1,11 +1,12 @@
 import React from 'react';
 import Tile from './tile';
-import FaBomb from 'react-icons/lib/fa/bomb';
+import { FaBomb, FaFlag } from 'react-icons/lib/fa';
 import { connect } from 'react-redux';
 import { editBoard, editTile, setRemainingTiles } from '../actions/boardActions';
 import { bindActionCreators } from 'redux';
 
 import '../css/board.css';
+import tile from './tile';
 
 class Board extends React.Component {
     constructor(props) {
@@ -19,6 +20,7 @@ class Board extends React.Component {
         this.flipTile = this.flipTile.bind(this);
         this.getNumberOfNeighborBombs = this.getNumberOfNeighborBombs.bind(this);
         this.autoFlipTile = this.autoFlipTile.bind(this);
+        this.showBombs = this.showBombs.bind(this);
     }
 
     generateBoard(numberOfRows, numberOfColumns, numberOfBombs) {
@@ -60,8 +62,7 @@ class Board extends React.Component {
         let markedTile;
 
         if (eventTile.props.isBomb) {
-            console.log('you lose');
-            // Build what happens when you lose
+            this.showBombs();
             markedTile = React.cloneElement(this.props.board[eventTile.props.row][eventTile.props.column], {wasClicked: true, value: <FaBomb />});            
             this.props.editTile(markedTile);
         } else if (this.getNumberOfNeighborBombs(eventTile) === 0) {
@@ -119,6 +120,18 @@ class Board extends React.Component {
         });
     
         return numberOfBombs;
+    }
+
+    showBombs() {
+        let bombTile;
+        this.props.board.forEach(row => {
+            row.forEach(tile => {
+                if (tile.props.isBomb) {
+                    bombTile = React.cloneElement(tile, {wasClicked: true, value: <FaBomb />});
+                    this.props.editTile(bombTile);                
+                }
+            });
+        });
     }
 
     render() {

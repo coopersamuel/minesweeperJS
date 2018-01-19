@@ -12,12 +12,16 @@ class App extends React.Component {
         let store = createStore(rootReducer, window.__REDUX_DEVTOOLS_EXTENSION__ && window.__REDUX_DEVTOOLS_EXTENSION__());        
 
         return (
-            <div className="content">
-                <h3 className="title">Minesweeper</h3>
-                <div className="board">
-                    <Provider store={store}>
-                        <Board numberOfRows={10} numberOfColumns={10} numberOfBombs={20} />
-                    </Provider>
+            <div>
+                <div className="title-bar">
+                    <h3 className="title">Minesweeper</h3>
+                </div>
+                <div className="content">
+                    <div className="board">
+                        <Provider store={store}>
+                            <Board numberOfRows={10} numberOfColumns={10} numberOfBombs={20} />
+                        </Provider>
+                    </div>
                 </div>
             </div>
         );

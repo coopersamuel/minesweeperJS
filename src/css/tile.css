@@ -4,11 +4,10 @@
     height: 35px;
     padding: 2px;
     border-radius: 4px;
-    background-color: #bcbcbc;
     outline: none;
     vertical-align: top;
 }
 
 button:hover {
-    background-color: aquamarine;
+    background-color: #afacac;
 }
