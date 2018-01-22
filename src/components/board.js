@@ -21,6 +21,7 @@ class Board extends React.Component {
         this.getNumberOfNeighborBombs = this.getNumberOfNeighborBombs.bind(this);
         this.autoFlipTile = this.autoFlipTile.bind(this);
         this.showBombs = this.showBombs.bind(this);
+        this.flagTile = this.flagTile.bind(this);
     }
 
     generateBoard(numberOfRows, numberOfColumns, numberOfBombs) {
@@ -35,6 +36,7 @@ class Board extends React.Component {
                                 row={i} column={j} 
                                 isBomb={false} 
                                 onTileClick={this.flipTile} 
+                                onRightClick={this.flagTile}
                                 wasClicked={false}
                                 value=''
                                 board={this} />);   // Passing the Board context to the tile explicitly
@@ -84,13 +86,11 @@ class Board extends React.Component {
         this.props.setRemainingTiles(numTiles--);
     }
 
-    autoFlipTile (tile) {
+    autoFlipTile(tile) {
         const neighborOffsets = [[-1,-1],[-1,0],[-1,1],[0,1],[1,1],[1,0],[1,-1],[0,-1]];
         const numberOfRows = this.props.board.length;
         const numberOfColumns = this.props.board[0].length;
         
-        console.log('here');
-
         neighborOffsets.forEach(offset => {
             const neighborRowIndex = tile.props.row + offset[0];
             const neighborColumnIndex = tile.props.column + offset[1];
@@ -132,6 +132,10 @@ class Board extends React.Component {
                 }
             });
         });
+    }
+
+    flagTile(tile) {
+        console.log('flagTile called!');
     }
 
     render() {

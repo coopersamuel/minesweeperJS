@@ -20,6 +20,9 @@ class Tile extends React.Component {
             <span className="tile">
                 <button disabled={this.props.wasClicked} style={tileColors} onClick={() => {
                     this.props.onTileClick.call(this.props.board, this);
+                }} onContextMenu={(event) => {
+                    event.preventDefault();
+                    this.props.onRightClick.call(this.props.board, this);
                 }}>
                     {this.props.value}
                 </button>
