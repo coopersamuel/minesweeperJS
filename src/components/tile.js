@@ -16,6 +16,13 @@ class Tile extends React.Component {
             }
         }
 
+        if (this.props.hasFlag) {
+            tileColors = {
+                color : '#4643D6',
+                backgroundColor : '#3a3a3a'
+            }
+        }
+
         return (
             <span className="tile">
                 <button disabled={this.props.wasClicked} style={tileColors} onClick={() => {

@@ -35,6 +35,7 @@ class Board extends React.Component {
                 row.push(<Tile  key={i.toString() + j.toString()} 
                                 row={i} column={j} 
                                 isBomb={false} 
+                                hasFlag={false}
                                 onTileClick={this.flipTile} 
                                 onRightClick={this.flagTile}
                                 wasClicked={false}
@@ -65,16 +66,16 @@ class Board extends React.Component {
 
         if (eventTile.props.isBomb) {
             this.showBombs();
-            markedTile = React.cloneElement(this.props.board[eventTile.props.row][eventTile.props.column], {wasClicked: true, value: <FaBomb />});            
+            markedTile = React.cloneElement(this.props.board[eventTile.props.row][eventTile.props.column], {wasClicked: true, hasFlag: false, value: <FaBomb />});            
             this.props.editTile(markedTile);
         } else if (this.getNumberOfNeighborBombs(eventTile) === 0) {
-            markedTile = React.cloneElement(this.props.board[eventTile.props.row][eventTile.props.column], {wasClicked: true, value: 0});
+            markedTile = React.cloneElement(this.props.board[eventTile.props.row][eventTile.props.column], {wasClicked: true, hasFlag: false, value: 0});
             this.props.editTile(markedTile);
             this.autoFlipTile(markedTile);
         } else {
             // Show how many bombs are adjacent to this tile
             numNeighborBombs = this.getNumberOfNeighborBombs(eventTile);
-            markedTile = React.cloneElement(this.props.board[eventTile.props.row][eventTile.props.column], {wasClicked: true, value: numNeighborBombs});
+            markedTile = React.cloneElement(this.props.board[eventTile.props.row][eventTile.props.column], {wasClicked: true, hasFlag: false, value: numNeighborBombs});
             this.props.editTile(markedTile);
         }
 
@@ -127,7 +128,7 @@ class Board extends React.Component {
         this.props.board.forEach(row => {
             row.forEach(tile => {
                 if (tile.props.isBomb) {
-                    bombTile = React.cloneElement(tile, {wasClicked: true, value: <FaBomb />});
+                    bombTile = React.cloneElement(tile, {wasClicked: true, hasFlag: false, value: <FaBomb />});
                     this.props.editTile(bombTile);                
                 }
             });
@@ -135,7 +136,17 @@ class Board extends React.Component {
     }
 
     flagTile(tile) {
-        console.log('flagTile called!');
+        let flaggedTile;
+
+        if (tile.props.hasFlag) {
+            // if there is already a flag, remove it
+            flaggedTile = React.cloneElement(this.props.board[tile.props.row][tile.props.column], { hasFlag: false, value: '' });            
+        } else {
+            flaggedTile = React.cloneElement(this.props.board[tile.props.row][tile.props.column], { hasFlag: true, value: <FaFlag /> });            
+        }
+
+        this.props.editTile(flaggedTile);
+        this.forceUpdate();
     }
 
     render() {
