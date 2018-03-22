@@ -19472,6 +19472,7 @@ var Board = function (_React$Component) {
                     row.push(_react2.default.createElement(_tile2.default, { key: i.toString() + j.toString(),
                         row: i, column: j,
                         isBomb: false,
+                        hasFlag: false,
                         onTileClick: this.flipTile,
                         onRightClick: this.flagTile,
                         wasClicked: false,
@@ -19505,16 +19506,16 @@ var Board = function (_React$Component) {
 
             if (eventTile.props.isBomb) {
                 this.showBombs();
-                markedTile = _react2.default.cloneElement(this.props.board[eventTile.props.row][eventTile.props.column], { wasClicked: true, value: _react2.default.createElement(_fa.FaBomb, null) });
+                markedTile = _react2.default.cloneElement(this.props.board[eventTile.props.row][eventTile.props.column], { wasClicked: true, hasFlag: false, value: _react2.default.createElement(_fa.FaBomb, null) });
                 this.props.editTile(markedTile);
             } else if (this.getNumberOfNeighborBombs(eventTile) === 0) {
-                markedTile = _react2.default.cloneElement(this.props.board[eventTile.props.row][eventTile.props.column], { wasClicked: true, value: 0 });
+                markedTile = _react2.default.cloneElement(this.props.board[eventTile.props.row][eventTile.props.column], { wasClicked: true, hasFlag: false, value: 0 });
                 this.props.editTile(markedTile);
                 this.autoFlipTile(markedTile);
             } else {
                 // Show how many bombs are adjacent to this tile
                 numNeighborBombs = this.getNumberOfNeighborBombs(eventTile);
-                markedTile = _react2.default.cloneElement(this.props.board[eventTile.props.row][eventTile.props.column], { wasClicked: true, value: numNeighborBombs });
+                markedTile = _react2.default.cloneElement(this.props.board[eventTile.props.row][eventTile.props.column], { wasClicked: true, hasFlag: false, value: numNeighborBombs });
                 this.props.editTile(markedTile);
             }
 
@@ -19576,7 +19577,7 @@ var Board = function (_React$Component) {
             this.props.board.forEach(function (row) {
                 row.forEach(function (tile) {
                     if (tile.props.isBomb) {
-                        bombTile = _react2.default.cloneElement(tile, { wasClicked: true, value: _react2.default.createElement(_fa.FaBomb, null) });
+                        bombTile = _react2.default.cloneElement(tile, { wasClicked: true, hasFlag: false, value: _react2.default.createElement(_fa.FaBomb, null) });
                         _this4.props.editTile(bombTile);
                     }
                 });
@@ -19585,7 +19586,17 @@ var Board = function (_React$Component) {
     }, {
         key: 'flagTile',
         value: function flagTile(tile) {
-            console.log('flagTile called!');
+            var flaggedTile = void 0;
+
+            if (tile.props.hasFlag) {
+                // if there is already a flag, remove it
+                flaggedTile = _react2.default.cloneElement(this.props.board[tile.props.row][tile.props.column], { hasFlag: false, value: '' });
+            } else {
+                flaggedTile = _react2.default.cloneElement(this.props.board[tile.props.row][tile.props.column], { hasFlag: true, value: _react2.default.createElement(_fa.FaFlag, null) });
+            }
+
+            this.props.editTile(flaggedTile);
+            this.forceUpdate();
         }
     }, {
         key: 'render',
@@ -19680,6 +19691,13 @@ var Tile = function (_React$Component) {
                 tileColors = {
                     color: valueColor,
                     backgroundColor: '#4e4d4d'
+                };
+            }
+
+            if (this.props.hasFlag) {
+                tileColors = {
+                    color: '#4643D6',
+                    backgroundColor: '#3a3a3a'
                 };
             }
 
