@@ -2,7 +2,7 @@ import React from 'react';
 import Tile from './tile';
 import { FaBomb, FaFlag } from 'react-icons/lib/fa';
 import { connect } from 'react-redux';
-import { editBoard, editTile, setRemainingTiles } from '../actions/boardActions';
+import { editBoard, editTile, setRemainingTiles, gameOver } from '../actions/boardActions';
 import { bindActionCreators } from 'redux';
 
 import '../css/board.css';
@@ -79,6 +79,10 @@ class Board extends React.Component {
             this.props.editTile(markedTile);
         }
 
+        if (this.props.remainingTiles === this.props.numberOfBombs) {
+            gameOver(true);
+        }
+
         this.forceUpdate(); // Forcing update because redux' shallow comparison neglects this tiny state change and doesn't re-render automatically
                             // https://github.com/reactjs/redux/issues/585
 
@@ -133,6 +137,8 @@ class Board extends React.Component {
                 }
             });
         });
+
+        this.props.gameOver(false);
     }
 
     flagTile(tile) {
@@ -168,7 +174,8 @@ function mapStateToProps (state) {
     // Whatever is returned here shows up as props for the Board container
     return {
         board : state.board,
-        remainingTiles : state.remainingTiles
+        remainingTiles : state.remainingTiles,
+        isWinner : state.gameOver
     };
 }
 
@@ -178,7 +185,8 @@ function mapDispatchToProps(dispatch) {
     return bindActionCreators({
         editBoard: editBoard,
         editTile: editTile,
-        setRemainingTiles: setRemainingTiles
+        setRemainingTiles: setRemainingTiles,
+        gameOver : gameOver
     }, dispatch);
 }
 
