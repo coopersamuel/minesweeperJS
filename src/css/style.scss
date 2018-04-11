@@ -1,18 +1,49 @@
 @import "@material/button/mdc-button";
+@import "@material/card/mdc-card";
+@import "@material/layout-grid/mdc-layout-grid";
+@import "@material/theme/mdc-theme";
+@import "@material/top-app-bar/mdc-top-app-bar";
+@import url('https://fonts.googleapis.com/css?family=Roboto+Mono:400,500');
 
-body {
-    background: #ffffff;
-    text-align: center;
-    font-family: Arial;
-    font-size: 16px;
-    margin: 0;
-    padding: 30px;
+$mdc-theme-primary: #591EE5; // Purple
+$mdc-theme-secondary: #ffffff; // White
+$mdc-theme-background: #3a3a3a; // Black
+
+html {
+    font-family: 'Roboto Mono';
 }
 
-.title {
-    font-family: Arial;
-    background-color: rgb(255, 255, 255);
-    color: #6c41ec;
+body {
+    background: $mdc-theme-secondary;
+    text-align: center;
+    font-size: 16px;
+    margin: 0;
+    padding: 0;
+}
+
+.top-bar {
+    .top-bar-title-container {
+        margin-left: 10%;
+        
+        .title {
+            letter-spacing: .2rem;
+            font-family: 'Roboto Mono';
+            font-weight: 500;
+        }
+    }
+
+    .top-bar-button-container {
+        margin-right: 10%;
+        
+        .top-bar-button {
+            letter-spacing: .2rem;
+            font-family: 'Roboto Mono';
+            font-weight: 500;
+            padding: none;
+            @include mdc-button-ink-color($mdc-theme-secondary);
+            @include mdc-states($mdc-theme-secondary);
+        }
+    }
 }
 
 .content {
@@ -20,20 +51,26 @@ body {
     float: none;
 }
 
-.foo-button {
-    @include mdc-button-ink-color(teal);
-    @include mdc-states(teal);
+// scss for board.js
+.board-container {
+    
 }
 
 // scss for tile.js
-.tile button {
-    cursor: pointer;
-    width: 35px;
-    height: 35px;
-    padding: 2px;
-    border-radius: 4px;
-    outline: none;
-    vertical-align: top;
+.tile {
+    .mdc-button {
+        &.tile-button {
+            @include mdc-button-ink-color($mdc-theme-primary);
+            @include mdc-states($mdc-theme-primary);
+            cursor: pointer;
+            min-width: 35px;
+            width: 35px;
+            height: 35px;
+            padding: 2px;
+            vertical-align: top;
+            margin: 1px;
+        }
+    }
 }
 
 button:hover {

@@ -154,14 +154,22 @@ class Board extends React.Component {
 
     render() {
         return (
-            <div>
-                {this.props.board.map(row => {
-                    return (
-                        <div>
-                            {row}
-                        </div>
-                    );
-                })}
+            <div className="mdc-layout-grid__cell">
+                <div className="mdc-card">
+                    <div className="board-container">
+                        {this.props.board.map(row => {
+                            return (
+                                <div>
+                                    {row}
+                                </div>
+                            );
+                        })}
+                    </div>
+                    <div className="mdc-card__actions">
+                        <button className="mdc-button mdc-card__action mdc-card__action--button">Action 1</button>
+                        <button className="mdc-button mdc-card__action mdc-card__action--button">Action 2</button>
+                    </div>
+                </div>
             </div>
         );
     }

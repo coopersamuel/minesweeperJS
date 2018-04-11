@@ -3,7 +3,7 @@ import React from 'react';
 class Tile extends React.Component {
     render() {
         let tileColors = {
-            backgroundColor : '#3a3a3a'
+            //backgroundColor : '#3a3a3a'
         }
 
         let valueColor = this.props.isBomb ? 'red' : '#797979';
@@ -11,20 +11,20 @@ class Tile extends React.Component {
         if (this.props.wasClicked) {
             tileColors = {
                 color : valueColor,
-                backgroundColor : '#4e4d4d'
+                //backgroundColor : '#4e4d4d'
             }
         }
 
         if (this.props.hasFlag) {
             tileColors = {
                 color : '#4643D6',
-                backgroundColor : '#3a3a3a'
+                //backgroundColor : '#3a3a3a'
             }
         }
 
         return (
             <span className="tile">
-                <button disabled={this.props.wasClicked} style={tileColors} onClick={() => {
+                <button className="mdc-button mdc-button--unelevated tile-button" disabled={this.props.wasClicked} style={tileColors} onClick={() => {
                     this.props.onTileClick.call(this.props.board, this);
                 }} onContextMenu={(event) => {
                     event.preventDefault();
