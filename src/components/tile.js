@@ -1,5 +1,4 @@
 import React from 'react';
-import '../css/tile.css';
 
 class Tile extends React.Component {
     render() {

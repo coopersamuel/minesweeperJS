@@ -5,9 +5,6 @@ import { connect } from 'react-redux';
 import { editBoard, editTile, setRemainingTiles, gameOver } from '../actions/boardActions';
 import { bindActionCreators } from 'redux';
 
-import '../css/board.css';
-import tile from './tile';
-
 class Board extends React.Component {
     constructor(props) {
         super(props);
@@ -173,9 +170,9 @@ class Board extends React.Component {
 function mapStateToProps (state) {
     // Whatever is returned here shows up as props for the Board container
     return {
-        board : state.board,
-        remainingTiles : state.remainingTiles,
-        isWinner : state.gameOver
+        board: state.board,
+        remainingTiles: state.remainingTiles,
+        isWinner: state.gameOver
     };
 }
 
@@ -186,7 +183,7 @@ function mapDispatchToProps(dispatch) {
         editBoard: editBoard,
         editTile: editTile,
         setRemainingTiles: setRemainingTiles,
-        gameOver : gameOver
+        gameOver: gameOver
     }, dispatch);
 }
 
