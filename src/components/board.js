@@ -68,7 +68,7 @@ class Board extends React.Component {
         } else if (this.getNumberOfNeighborBombs(eventTile) === 0) {
             markedTile = React.cloneElement(this.props.board[eventTile.props.row][eventTile.props.column], {wasClicked: true, hasFlag: false, value: 0});
             this.props.editTile(markedTile);
-            this.autoFlipTile(markedTile);
+            setTimeout(() => this.autoFlipTile(markedTile), 50); // setTimeout creates an effect when autoflipping tiles
         } else {
             // Show how many bombs are adjacent to this tile
             numNeighborBombs = this.getNumberOfNeighborBombs(eventTile);
@@ -154,14 +154,22 @@ class Board extends React.Component {
 
     render() {
         return (
-            <div>
-                {this.props.board.map(row => {
-                    return (
-                        <div>
-                            {row}
-                        </div>
-                    );
-                })}
+            <div className="mdc-layout-grid__cell">
+                <div className="mdc-card">
+                    <div className="board-container">
+                        {this.props.board.map(row => {
+                            return (
+                                <div>
+                                    {row}
+                                </div>
+                            );
+                        })}
+                    </div>
+                    <div className="mdc-card__actions">
+                        <button className="mdc-button mdc-card__action mdc-card__action--button">Action 1</button>
+                        <button className="mdc-button mdc-card__action mdc-card__action--button">Action 2</button>
+                    </div>
+                </div>
             </div>
         );
     }
