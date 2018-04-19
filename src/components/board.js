@@ -68,7 +68,7 @@ class Board extends React.Component {
         } else if (this.getNumberOfNeighborBombs(eventTile) === 0) {
             markedTile = React.cloneElement(this.props.board[eventTile.props.row][eventTile.props.column], {wasClicked: true, hasFlag: false, value: 0});
             this.props.editTile(markedTile);
-            this.autoFlipTile(markedTile);
+            setTimeout(() => this.autoFlipTile(markedTile), 50); // setTimeout creates an effect when autoflipping tiles
         } else {
             // Show how many bombs are adjacent to this tile
             numNeighborBombs = this.getNumberOfNeighborBombs(eventTile);
