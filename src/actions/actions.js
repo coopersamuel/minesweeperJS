@@ -2,24 +2,6 @@ import * as Types from './actionTypes';
 
 // action creators
 
-// export function editBoard(board) {
-//     return {
-//         type : EDIT_BOARD,
-//         payload : board
-//     };
-// }
-
-// export function gameOver(isWinner) {
-//     return {
-//         type : GAME_OVER,
-//         payload : isWinner
-//     };
-// }
-
-/*
-*   New stuff
-*/
-
 export const generateBoard = (numberOfRows, numberOfColumns) => {
     return {
         type: Types.GENERATE_BOARD,
