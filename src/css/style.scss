@@ -5,8 +5,8 @@
 @import "@material/top-app-bar/mdc-top-app-bar";
 @import url('https://fonts.googleapis.com/css?family=Roboto+Mono:400,500');
 
-$mdc-theme-primary: #591EE5; // Purple
-$mdc-theme-secondary: #ffffff; // White
+$mdc-theme-primary: #3f5ca8; // Blue
+$mdc-theme-secondary: #f7f8fa; // White
 $mdc-theme-background: #3a3a3a; // Black
 
 html {
@@ -14,7 +14,7 @@ html {
 }
 
 body {
-    background: $mdc-theme-secondary;
+    background-color: $mdc-theme-secondary;
     text-align: center;
     font-size: 16px;
     margin: 0;
@@ -22,6 +22,8 @@ body {
 }
 
 .top-bar {
+    background-color: $mdc-theme-primary;
+
     .top-bar-title-container {
         margin-left: 10%;
         
@@ -53,15 +55,15 @@ body {
 
 // scss for board.js
 .board-container {
-    
+    padding: 1rem;
 }
 
 // scss for tile.js
 .tile {
     .mdc-button {
         &.tile-button {
-            @include mdc-button-ink-color($mdc-theme-primary);
-            @include mdc-states($mdc-theme-primary);
+            @include mdc-button-ink-color($mdc-theme-secondary);
+            @include mdc-states($mdc-theme-secondary);
             cursor: pointer;
             min-width: 35px;
             width: 35px;
@@ -71,8 +73,52 @@ body {
             margin: 1px;
         }
     }
+
+    .normal-tile {
+        background-color: $mdc-theme-primary;
+    }
+
+    .clicked-tile {
+        color: $mdc-theme-primary;
+        background-color: $mdc-theme-secondary;
+    }
+
+    .flag-tile {
+        color: $mdc-theme-secondary;
+    }
+
+    .bomb-tile {
+        color:  red;
+        background-color: $mdc-theme-secondary;
+    }
 }
 
 button:hover {
     background-color: #afacac;
+}
+
+.mdc-card__action-buttons {
+    padding: 0 1rem 1rem 1rem;
+
+    .mdc-button {
+        &.card-button {
+            background-color: $mdc-theme-secondary;
+            color: $mdc-theme-primary;
+            @include mdc-button-ink-color($mdc-theme-primary);
+            @include mdc-states($mdc-theme-primary);
+        }
+    }
+}
+
+.mdc-card__action-icons {
+    padding: 0 1rem 1rem 1rem;
+
+    .mdc-button {
+        &.card-button {
+            background-color: $mdc-theme-secondary;
+            color: $mdc-theme-primary;
+            @include mdc-button-ink-color($mdc-theme-primary);
+            @include mdc-states($mdc-theme-primary);
+        }
+    }
 }

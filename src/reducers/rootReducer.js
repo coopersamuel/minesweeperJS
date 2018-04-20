@@ -1,12 +1,10 @@
 import { combineReducers } from 'redux';
-import boardReducer from './boardReducer';
-import setRemainingTilesReducer from './setRemainingTilesReducer';
-import gameOverReducer from './gameOverReducer';
+import board from './board';
+import remainingTiles from './remainingTiles';
 
 const rootReducer = combineReducers({
-    board : boardReducer,
-    remainingTiles : setRemainingTilesReducer,
-    gameOver : gameOverReducer
+    board,
+    remainingTiles,
 });
 
 export default rootReducer;

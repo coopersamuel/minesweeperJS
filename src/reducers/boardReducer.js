@@ -1,12 +1,13 @@
 import * as Types from '../actions/actionTypes';
+import { cloneDeep, forEach } from 'lodash';
 
 const initialState = {
-    board : []
+    board: []
 };
 
 // state argument is not the same as application state, only the piece of state that this reducer is responsible for
 export default function boardReducer(state = initialState.board, action) {
-    let newState = state;
+        let newState = state; // <-- this is taking way too long...
 
     switch (action.type) {
         case Types.EDIT_BOARD:
@@ -16,5 +17,5 @@ export default function boardReducer(state = initialState.board, action) {
             return newState;
     }
 
-    return state;
+    return newState;
 }

@@ -2,7 +2,8 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import Board from './components/board';
 import { Provider } from 'react-redux';
-import { createStore } from 'redux';
+import { createStore, applyMiddleware } from 'redux';
+import { composeWithDevTools } from 'redux-devtools-extension';
 import rootReducer from './reducers/rootReducer';
 import { MDCRipple } from '@material/ripple';
 import { FaGithub, FaLinkedin } from 'react-icons/lib/fa'
@@ -11,7 +12,7 @@ import './css/style.scss';
 
 class App extends React.Component {
     render() {
-        let store = createStore(rootReducer, window.__REDUX_DEVTOOLS_EXTENSION__ && window.__REDUX_DEVTOOLS_EXTENSION__());       
+        let store = createStore(rootReducer, composeWithDevTools());       
 
         return (
             <div>
@@ -32,9 +33,8 @@ class App extends React.Component {
                 </header>
                 <div className="content mdc-layout-grid">
                     <Provider store={store}>
-                        <Board numberOfRows={10} numberOfColumns={10} numberOfBombs={20} />
+                        <Board />
                     </Provider>
-                    <div className="foo-button mdc-button">Hello World!</div>
                 </div>
             </div>
         );

@@ -1,19 +1,18 @@
 import React from 'react';
 import Tile from './tile';
 import { FaBomb, FaFlag } from 'react-icons/lib/fa';
+import { MdRefresh } from 'react-icons/lib/md';
 import { connect } from 'react-redux';
-import { editBoard, editTile, setRemainingTiles, gameOver } from '../actions/boardActions';
+import { generateBoard, placeBombs, setRemainingTiles, markTile, revealBombs } from '../actions/actions';
 import { bindActionCreators } from 'redux';
 
 class Board extends React.Component {
     constructor(props) {
         super(props);
 
-        // Need to initialize the board in redux state
-        this.generateBoard(this.props.numberOfRows, this.props.numberOfColumns, this.props.numberOfBombs);
-        this.props.setRemainingTiles(this.props.numberOfRows * this.props.numberOfColumns);
+        this.changeDifficultyLevel('easy');
 
-        this.generateBoard = this.generateBoard.bind(this);
+        this.changeDifficultyLevel = this.changeDifficultyLevel.bind(this);
         this.flipTile = this.flipTile.bind(this);
         this.getNumberOfNeighborBombs = this.getNumberOfNeighborBombs.bind(this);
         this.autoFlipTile = this.autoFlipTile.bind(this);
@@ -21,101 +20,97 @@ class Board extends React.Component {
         this.flagTile = this.flagTile.bind(this);
     }
 
-    generateBoard(numberOfRows, numberOfColumns, numberOfBombs) {
-        let board = [];
-        let numberOfBombsPlaced = 0;
-        
-        // Optimize this
-        for (let i = 0; i < numberOfRows; i++) {
-            let row = [];
-            for (let j = 0; j < numberOfColumns; j++) {
-                row.push(<Tile  key={i.toString() + j.toString()} 
-                                row={i} column={j} 
-                                isBomb={false} 
-                                hasFlag={false}
-                                onTileClick={this.flipTile} 
-                                onRightClick={this.flagTile}
-                                wasClicked={false}
-                                value=''
-                                board={this} />);   // Passing the Board context to the tile explicitly
-            }
-            board.push(row);
+    changeDifficultyLevel(level) {
+        // This function regenerates the board based on difficulty level
+        let rows, columns, bombs;
+
+        switch(level) {
+            case 'easy':
+                rows = 10;
+                columns = 10;
+                bombs = 10;
+                break;
+            case 'medium':
+                rows = 16;
+                columns = 16;
+                bombs = 40;
+                break;
+            case 'hard':
+                rows = 16;
+                columns = 30;
+                bombs = 99;
+                break;
+            case 'refresh':
+                rows = this.props.board.length;
+                columns = this.props.board[0].length;
+                if (rows * columns <= 100) {
+                    bombs = 10; // easy
+                } else if (rows * columns >= 480) {
+                    bombs = 99; // hard
+                } else {
+                    bombs = 40; // medium
+                }
+                break;
+            default:
+                rows = 10;
+                columns = 10;
+                bombs = 10;
+                break;
         }
 
-        while (numberOfBombsPlaced < numberOfBombs) {
-            let randomRowIndex = Math.floor(Math.random() * numberOfRows);
-            let randomColumnIndex = Math.floor(Math.random() * numberOfColumns);
-
-            if (!board[randomRowIndex][randomColumnIndex].props.isBomb) {
-                board[randomRowIndex][randomColumnIndex] = React.cloneElement(board[randomRowIndex][randomColumnIndex], {isBomb: true});
-                numberOfBombsPlaced++;
-            }
-        }
-
-        // call action to initialize the board
-        this.props.editBoard(board);
+        this.props.generateBoard(rows, columns);
+        this.props.placeBombs(rows, columns, bombs);
+        this.props.setRemainingTiles(rows * columns);
     }
 
     // Handle a tile click
-    flipTile(eventTile) {
-        let numNeighborBombs = 0;
-        let markedTile;
-
-        if (eventTile.props.isBomb) {
+    flipTile(targetRow, targetColumn) {
+        if (this.props.board[targetRow][targetColumn].isBomb) {
             this.showBombs();
-            markedTile = React.cloneElement(this.props.board[eventTile.props.row][eventTile.props.column], {wasClicked: true, hasFlag: false, value: <FaBomb />});            
-            this.props.editTile(markedTile);
-        } else if (this.getNumberOfNeighborBombs(eventTile) === 0) {
-            markedTile = React.cloneElement(this.props.board[eventTile.props.row][eventTile.props.column], {wasClicked: true, hasFlag: false, value: 0});
-            this.props.editTile(markedTile);
-            setTimeout(() => this.autoFlipTile(markedTile), 50); // setTimeout creates an effect when autoflipping tiles
+        } else if (this.getNumberOfNeighborBombs(targetRow, targetColumn) === 0) {
+            this.props.markTile(targetRow, targetColumn, 0);
+            this.autoFlipTile(targetRow, targetColumn);
         } else {
             // Show how many bombs are adjacent to this tile
-            numNeighborBombs = this.getNumberOfNeighborBombs(eventTile);
-            markedTile = React.cloneElement(this.props.board[eventTile.props.row][eventTile.props.column], {wasClicked: true, hasFlag: false, value: numNeighborBombs});
-            this.props.editTile(markedTile);
+            this.props.markTile(targetRow, targetColumn, this.getNumberOfNeighborBombs(targetRow, targetColumn));
         }
 
-        if (this.props.remainingTiles === this.props.numberOfBombs) {
-            gameOver(true);
-        }
-
-        this.forceUpdate(); // Forcing update because redux' shallow comparison neglects this tiny state change and doesn't re-render automatically
-                            // https://github.com/reactjs/redux/issues/585
+        // if (this.props.remainingTiles === this.props.numberOfBombs) {
+        //     gameOver(true);
+        // }
 
         // Update the number of tiles remaining, so you know when the game is over
         let numTiles = this.props.remainingTiles;
-        this.props.setRemainingTiles(numTiles--);
+        this.props.setRemainingTiles(--numTiles);
     }
 
-    autoFlipTile(tile) {
+    autoFlipTile(targetRow, targetColumn) {
         const neighborOffsets = [[-1,-1],[-1,0],[-1,1],[0,1],[1,1],[1,0],[1,-1],[0,-1]];
         const numberOfRows = this.props.board.length;
         const numberOfColumns = this.props.board[0].length;
         
         neighborOffsets.forEach(offset => {
-            const neighborRowIndex = tile.props.row + offset[0];
-            const neighborColumnIndex = tile.props.column + offset[1];
+            const neighborRowIndex = targetRow + offset[0];
+            const neighborColumnIndex = targetColumn + offset[1];
             
-            if (neighborRowIndex >= 0 && neighborRowIndex < numberOfRows && neighborColumnIndex >= 0 && neighborColumnIndex < numberOfColumns && !this.props.board[neighborRowIndex][neighborColumnIndex].props.wasClicked) {
-                let neighborTile = this.props.board[neighborRowIndex][neighborColumnIndex];                 
-                this.flipTile(neighborTile);
+            if (neighborRowIndex >= 0 && neighborRowIndex < numberOfRows && neighborColumnIndex >= 0 && neighborColumnIndex < numberOfColumns && this.props.board[neighborRowIndex][neighborColumnIndex].value === '') {              
+                this.flipTile(neighborRowIndex, neighborColumnIndex);
             }
         });
     }
 
-    getNumberOfNeighborBombs(tile) {
+    getNumberOfNeighborBombs(targetRow, targetColumn) {
         const neighborOffsets = [[-1,-1],[-1,0],[-1,1],[0,1],[1,1],[1,0],[1,-1],[0,-1]];
         const numberOfRows = this.props.board.length;
         const numberOfColumns = this.props.board[0].length;
         let numberOfBombs = 0;
     
         neighborOffsets.forEach(offset => {
-            const neighborRowIndex = tile.props.row + offset[0];
-            const neighborColumnIndex = tile.props.column + offset[1];
+            const neighborRowIndex = targetRow + offset[0];
+            const neighborColumnIndex = targetColumn + offset[1];
     
             if (neighborRowIndex >= 0 && neighborRowIndex < numberOfRows && neighborColumnIndex >= 0 && neighborColumnIndex < numberOfColumns) {
-                if (this.props.board[neighborRowIndex][neighborColumnIndex].props.isBomb) {
+                if (this.props.board[neighborRowIndex][neighborColumnIndex].isBomb) {
                     numberOfBombs++;
                 }
             }
@@ -125,31 +120,12 @@ class Board extends React.Component {
     }
 
     showBombs() {
-        let bombTile;
-        this.props.board.forEach(row => {
-            row.forEach(tile => {
-                if (tile.props.isBomb) {
-                    bombTile = React.cloneElement(tile, {wasClicked: true, hasFlag: false, value: <FaBomb />});
-                    this.props.editTile(bombTile);                
-                }
-            });
-        });
-
-        this.props.gameOver(false);
+        this.props.revealBombs();
+        // this.props.gameOver(false);
     }
 
-    flagTile(tile) {
-        let flaggedTile;
-
-        if (tile.props.hasFlag) {
-            // if there is already a flag, remove it
-            flaggedTile = React.cloneElement(this.props.board[tile.props.row][tile.props.column], { hasFlag: false, value: '' });            
-        } else {
-            flaggedTile = React.cloneElement(this.props.board[tile.props.row][tile.props.column], { hasFlag: true, value: <FaFlag /> });            
-        }
-
-        this.props.editTile(flaggedTile);
-        this.forceUpdate();
+    flagTile(targetRow, targetColumn) {
+        this.props.markTile(targetRow, targetColumn, 'F');
     }
 
     render() {
@@ -157,17 +133,69 @@ class Board extends React.Component {
             <div className="mdc-layout-grid__cell">
                 <div className="mdc-card">
                     <div className="board-container">
-                        {this.props.board.map(row => {
+                        {this.props.board.map((tileRow, row) => {
                             return (
                                 <div>
-                                    {row}
+                                    {tileRow.map((tile, column) => {
+                                        if (tile.value === '') {
+                                            // Unclicked tile
+                                            return <Tile key={row.toString() + column.toString()} 
+                                                    row={row} column={column} 
+                                                    isBomb={false} 
+                                                    hasFlag={false}
+                                                    onTileClick={this.flipTile} 
+                                                    onRightClick={this.flagTile}
+                                                    wasClicked={false}
+                                                    value=''
+                                                    board={this} />; // Passing the Board context to the tile explicitly
+                                        } else if (tile.value === 'B') {
+                                            // Clicked bomb tile
+                                            return <Tile key={row.toString() + column.toString()} 
+                                                    row={row} column={column} 
+                                                    isBomb={true} 
+                                                    hasFlag={false}
+                                                    onTileClick={this.flipTile} 
+                                                    onRightClick={this.flagTile}
+                                                    wasClicked={true}
+                                                    value={<FaBomb />}
+                                                    board={this} />; // Passing the Board context to the tile explicitly
+                                        } else if (tile.value === 'F') {
+                                            // Unclicked tile with flag
+                                            return <Tile key={row.toString() + column.toString()} 
+                                                    row={row} column={column} 
+                                                    isBomb={false} 
+                                                    hasFlag={true}
+                                                    onTileClick={this.flipTile} 
+                                                    onRightClick={this.flagTile}
+                                                    wasClicked={false}
+                                                    value={<FaFlag />}
+                                                    board={this} />; // Passing the Board context to the tile explicitly
+                                        } else {
+                                            // Clicked tile with number
+                                            return <Tile key={row.toString() + column.toString()} 
+                                                    row={row} column={column} 
+                                                    isBomb={false} 
+                                                    hasFlag={false}
+                                                    onTileClick={this.flipTile} 
+                                                    onRightClick={this.flagTile}
+                                                    wasClicked={true}
+                                                    value={tile.value}
+                                                    board={this} />; // Passing the Board context to the tile explicitly
+                                        }
+                                    })}
                                 </div>
                             );
                         })}
                     </div>
                     <div className="mdc-card__actions">
-                        <button className="mdc-button mdc-card__action mdc-card__action--button">Action 1</button>
-                        <button className="mdc-button mdc-card__action mdc-card__action--button">Action 2</button>
+                        <div className="mdc-card__action-buttons">
+                            <button className="mdc-button mdc-card__action mdc-card__action--button card-button" onClick={() => this.changeDifficultyLevel('easy')}>Easy</button>
+                            <button className="mdc-button mdc-card__action mdc-card__action--button card-button" onClick={() => this.changeDifficultyLevel('medium')}>Medium</button>
+                            <button className="mdc-button mdc-card__action mdc-card__action--button card-button" onClick={() => this.changeDifficultyLevel('hard')}>Hard</button>
+                        </div>
+                        <div className="mdc-card__action-icons">
+                            <button className="mdc-button mdc-card__action-icon mdc-card__action--button card-button refresh" onClick={() => this.changeDifficultyLevel('refresh')}><MdRefresh /></button>                        
+                        </div>
                     </div>
                 </div>
             </div>
@@ -180,7 +208,6 @@ function mapStateToProps (state) {
     return {
         board: state.board,
         remainingTiles: state.remainingTiles,
-        isWinner: state.gameOver
     };
 }
 
@@ -188,10 +215,11 @@ function mapStateToProps (state) {
 function mapDispatchToProps(dispatch) {
     // whenever the action is called, bindActionCreators will pass the result to all of our reducers
     return bindActionCreators({
-        editBoard: editBoard,
-        editTile: editTile,
-        setRemainingTiles: setRemainingTiles,
-        gameOver: gameOver
+        generateBoard,
+        placeBombs,
+        setRemainingTiles,
+        markTile,
+        revealBombs,
     }, dispatch);
 }
 

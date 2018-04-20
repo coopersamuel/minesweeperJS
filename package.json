@@ -36,11 +36,13 @@
     "@material/ripple": "^0.34.1",
     "@material/theme": "^0.33.0",
     "@material/top-app-bar": "^0.34.1",
+    "lodash": "^4.17.5",
     "material-components-web": "^0.34.1",
     "react": "^16.2.0",
     "react-dom": "^16.2.0",
     "react-icons": "^2.2.7",
     "react-redux": "^5.0.6",
-    "redux": "^3.7.2"
+    "redux": "^3.7.2",
+    "redux-devtools-extension": "^2.13.2"
   }
 }
